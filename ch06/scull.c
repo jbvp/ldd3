@@ -223,6 +223,7 @@ static int scull_open(struct inode *inode, struct file *filp)
 static long scull_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	int err = 0, ret = 0;
+	struct scull_dev *dev = filp->private_data;
 
 	if (_IOC_TYPE(cmd) != SCULL_IOC_MAGIC || _IOC_NR(cmd) > SCULL_IOC_MAX_NR)
 		return -ENOTTY;
@@ -237,28 +238,28 @@ static long scull_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 	switch (cmd) {
 
 	case SCULL_IOC_RESET:
-		scull_quantum = SCULL_QUANTUM;
-		scull_qset = SCULL_QSET;
+		dev->quantum = scull_quantum;
+		dev->qset = scull_qset;
 		break;
 
 	case SCULL_IOC_GET_QUANTUM:
-		ret = __put_user(scull_quantum, (int __user *)arg);
+		ret = __put_user(dev->quantum, (int __user *)arg);
 		break;
 
 	case SCULL_IOC_SET_QUANTUM:
 		if (! capable(CAP_SYS_ADMIN))
 			return -EPERM;
-		ret = __get_user(scull_quantum, (int __user *)arg);
+		ret = __get_user(dev->quantum, (int __user *)arg);
 		break;
 
 	case SCULL_IOC_GET_QSET:
-		ret = __put_user(scull_qset, (int __user *)arg);
+		ret = __put_user(dev->qset, (int __user *)arg);
 		break;
 
 	case SCULL_IOC_SET_QSET:
 		if (! capable(CAP_SYS_ADMIN))
 			return -EPERM;
-		ret = __get_user(scull_qset, (int __user *)arg);
+		ret = __get_user(dev->qset, (int __user *)arg);
 		break;
 
 	default:
